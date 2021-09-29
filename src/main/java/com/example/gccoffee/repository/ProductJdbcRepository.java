@@ -50,7 +50,7 @@ public class ProductJdbcRepository implements ProductRepository {
                 + " VALUES (UNHEX(REPLACE(:productId, '-', '')), :productName, :category, :price, :description, :createdAt, :updatedAt)",
             toParamMap(product));
         if (update != 1) {
-            throw new RuntimeException("Noting was inserted");
+            throw new RuntimeException("Nothing was inserted");
         }
 
         return product;
@@ -58,7 +58,15 @@ public class ProductJdbcRepository implements ProductRepository {
 
     @Override
     public Product update(Product product) {
-        return null;
+        int update = jdbcTemplate.update(
+            "UPDATE products SET product_name = :productName, category = :category, price = :price, description = :description, created_at = :createdAt, updated_at = :updatedAt"
+                + " WHERE product_id = UNHEX(REPLACE(:productId, '-', ''))", toParamMap(product));
+
+        if (update != 1) {
+            throw new RuntimeException("Nothing was updated");
+        }
+
+        return product;
     }
 
     @Override
@@ -95,7 +103,7 @@ public class ProductJdbcRepository implements ProductRepository {
 
     @Override
     public void deleteAll() {
-
+        jdbcTemplate.update("DELETE FROM products", Collections.emptyMap());
     }
 
     private Map<String, Object> toParamMap(Product product) {
